@@ -1,0 +1,38 @@
+library(RODBC)
+rm(list = ls())
+options(scipen = 200)
+
+timestart<-Sys.time();
+filenames <- list.files(pattern = "^DATA.")                    #获取所有的数据表名
+Case1 <- odbcConnectExcel("DATA1.xls")                         #获取数据表
+ds1 <- sqlFetch(Case1, "sheet1$",stringsAsFactor=F)            #获取表中的每个sheet
+ck1 <- sqlFetch(Case1, "sheet2$",stringsAsFactor=F)
+ba1 <- sqlFetch(Case1, "sheet3$",stringsAsFactor=F)
+bd1 <- sqlFetch(Case1, "sheet4$",stringsAsFactor=F)
+bx1 <- sqlFetch(Case1, "sheet5$",stringsAsFactor=F)
+rs1 <- sqlFetch(Case1,"sheet6$",stringsAsFactor=F)
+
+for (i in 2:length(filenames)) {                               #循环合并
+  case2 <- odbcConnectExcel(filenames[i])
+  ds2 <- sqlFetch(case2, "sheet1$",stringsAsFactor=F)
+  ck2 <- sqlFetch(case2, "sheet2$",stringsAsFactor=F)
+  ba2 <- sqlFetch(case2, "sheet3$",stringsAsFactor=F)
+  bd2 <- sqlFetch(case2, "sheet4$",stringsAsFactor=F)
+  bx2 <- sqlFetch(case2, "sheet5$",stringsAsFactor=F)
+  rs2 <- sqlFetch(case2,"sheet6$",stringsAsFactor=F)
+  
+  ds1 <- rbind(ds1,ds2)
+  ck1 <- rbind(ck1,ck2)
+  ba1 <- rbind(ba1,ba2)
+  bd1 <- rbind(bd1,bd2)
+  bx1 <- rbind(bx1,bx2)
+  rs1 <- rbind(rs1,rs2)
+}
+rm(ba2,ds2,ck2,bd2,bx2,rs2)                       
+
+load("importData.RData")
+timeend<-Sys.time()
+runtime <- timeend - timestart
+print(runtime)
+
+
